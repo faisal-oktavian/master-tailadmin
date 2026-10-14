@@ -1,0 +1,6 @@
+# Jangan pernah mengeksekusi script dari folder upload
+<FilesMatch "\.(php|phtml|php\d|phar|pl|py|cgi)$">
+    Require all denied
+</FilesMatch>
+php_flag engine off
+Options -Indexes

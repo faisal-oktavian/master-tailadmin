@@ -1,0 +1,9 @@
+node_modules/
+application/logs/*
+!application/logs/index.html
+!application/logs/.htaccess
+application/cache/*
+!application/cache/index.html
+!application/cache/.htaccess
+uploads/karyawan/*
+!uploads/karyawan/index.html
