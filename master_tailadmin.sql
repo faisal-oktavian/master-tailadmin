@@ -96,6 +96,29 @@ INSERT INTO `karyawan` (`id`, `kode`, `nama`, `email`, `password`, `telepon`, `w
 	(49, 'KRY-049', 'Reza Pahlevi', 'reza.pahlevi49@example.com', '$2b$10$hkdBpIBGNBLHYhCbF9ffm.JXWQBJ5maOCSg/RFcbvkpqRWkAbFwRy', '087797444123', NULL, 5050000.00, '1986-03-19', '08:00:00', '2023-11-03 09:00:00', '#ee46bc', 3, 'Penjualan', 'L', 'Administrasi,Microsoft Office', 'Indonesia,Inggris', 1, 'Jl. Ahmad Yani No. 105, Gresik', NULL, '2026-10-14 08:00:00', NULL),
 	(50, 'KRY-050', 'Rani Kusuma', 'rani.kusuma50@example.com', '$2b$10$hkdBpIBGNBLHYhCbF9ffm.JXWQBJ5maOCSg/RFcbvkpqRWkAbFwRy', '089976500726', '', 4050000.00, '1999-07-27', '09:00:00', '2025-01-03 09:00:00', '#06aed4', 9, 'IT', 'P', 'PHP', 'Indonesia,Inggris,Jepang', 1, 'Jl. Pahlawan No. 83, Surabaya', NULL, '2026-10-14 08:00:00', '2026-10-14 08:10:16');
 
+-- Dumping structure for table master_tailadmin.role
+CREATE TABLE IF NOT EXISTS `role` (
+  `idrole` int NOT NULL AUTO_INCREMENT,
+  `parent` int DEFAULT NULL,
+  `name` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `title` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `description` varchar(200) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `created` datetime DEFAULT NULL,
+  `createdby` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `updated` datetime DEFAULT NULL,
+  `updatedby` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `status` int NOT NULL DEFAULT '1',
+  PRIMARY KEY (`idrole`),
+  UNIQUE KEY `uk_role_name` (`name`)
+) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Dumping data for table master_tailadmin.role: ~2 rows (approximately)
+INSERT INTO `role` (`idrole`, `parent`, `name`, `title`, `description`, `created`, `createdby`, `updated`, `updatedby`, `status`) VALUES
+	(1, 0, 'superadmin', 'Super Admin', 'Akses penuh ke seluruh menu.', '2026-10-19 11:59:16', 'superadmin', '2026-10-19 11:59:21', 'superadmin', 1),
+	(2, 0, 'administrator', 'Administrator', 'Akses penuh ke seluruh menu.', '2026-10-19 11:59:17', 'superadmin', '2026-10-19 11:59:21', 'superadmin', 1),
+	(3, 0, 'operator', 'Operator', 'Akses menu operasional.', '2026-10-19 11:59:18', 'superadmin', '2026-10-19 11:59:22', 'superadmin', 1),
+	(4, NULL, 'staff_admin', 'Staff Admin', 'untuk staff admin yang tidak mempunyai akses ke menu hak akses', '2026-10-15 05:19:44', 'superadmin', '2026-10-15 05:19:44', 'superadmin', 1);
+
 -- Dumping structure for table master_tailadmin.supplier
 CREATE TABLE IF NOT EXISTS `supplier` (
   `id` int unsigned NOT NULL AUTO_INCREMENT,
@@ -131,21 +154,90 @@ INSERT INTO `supplier` (`id`, `kode`, `nama`, `email`, `telepon`, `kota`, `alama
 -- Dumping structure for table master_tailadmin.users
 CREATE TABLE IF NOT EXISTS `users` (
   `id` int unsigned NOT NULL AUTO_INCREMENT,
+  `idrole` int DEFAULT NULL,
   `nama` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
   `email` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
   `password` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `created_at` datetime DEFAULT NULL,
+  `created` datetime DEFAULT NULL,
+  `createdby` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `updated` datetime DEFAULT NULL,
+  `updatedby` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `status` int DEFAULT '1',
   PRIMARY KEY (`id`),
-  UNIQUE KEY `uk_users_email` (`email`)
-) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+  UNIQUE KEY `uk_users_email` (`email`),
+  KEY `idx_users_idrole` (`idrole`),
+  CONSTRAINT `fk_users_role` FOREIGN KEY (`idrole`) REFERENCES `role` (`idrole`) ON DELETE RESTRICT ON UPDATE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Dumping data for table master_tailadmin.users: ~5 rows (approximately)
-INSERT INTO `users` (`id`, `nama`, `email`, `password`, `created_at`) VALUES
-	(1, 'Administrator', 'superadmin@gmail.com', '$2b$10$hkdBpIBGNBLHYhCbF9ffm.JXWQBJ5maOCSg/RFcbvkpqRWkAbFwRy', '2026-10-10 08:00:00'),
-	(2, 'Operator Sistem', 'operator@example.com', '$2b$10$hkdBpIBGNBLHYhCbF9ffm.JXWQBJ5maOCSg/RFcbvkpqRWkAbFwRy', '2026-10-11 08:00:00'),
-	(3, 'Manajer HRD', 'hrd@example.com', '$2b$10$hkdBpIBGNBLHYhCbF9ffm.JXWQBJ5maOCSg/RFcbvkpqRWkAbFwRy', '2026-10-12 08:00:00'),
-	(4, 'Staf Keuangan', 'keuangan@example.com', '$2b$10$hkdBpIBGNBLHYhCbF9ffm.JXWQBJ5maOCSg/RFcbvkpqRWkAbFwRy', '2026-10-13 08:00:00'),
-	(5, 'Supervisor Operasional', 'supervisor@example.com', '$2b$10$hkdBpIBGNBLHYhCbF9ffm.JXWQBJ5maOCSg/RFcbvkpqRWkAbFwRy', '2026-10-14 08:00:00');
+-- Dumping data for table master_tailadmin.users: ~6 rows (approximately)
+INSERT INTO `users` (`id`, `idrole`, `nama`, `email`, `password`, `created`, `createdby`, `updated`, `updatedby`, `status`) VALUES
+	(1, 1, 'Super Admin', 'superall@gmail.com', '$2b$10$hkdBpIBGNBLHYhCbF9ffm.JXWQBJ5maOCSg/RFcbvkpqRWkAbFwRy', '2026-10-19 03:27:03', 'superadmin', '2026-10-19 11:58:59', 'superadmin', 1),
+	(2, 2, 'Administrator', 'administrator@gmail.com', '$2b$10$hkdBpIBGNBLHYhCbF9ffm.JXWQBJ5maOCSg/RFcbvkpqRWkAbFwRy', '2026-10-10 08:00:00', 'superadmin', '2026-10-19 11:59:05', 'superadmin', 1),
+	(3, 3, 'Operator Sistem', 'operator@example.com', '$2b$10$hkdBpIBGNBLHYhCbF9ffm.JXWQBJ5maOCSg/RFcbvkpqRWkAbFwRy', '2026-10-11 08:00:00', 'superadmin', '2026-10-19 11:59:05', 'superadmin', 1),
+	(4, 3, 'Manajer HRD', 'hrd@example.com', '$2b$10$hkdBpIBGNBLHYhCbF9ffm.JXWQBJ5maOCSg/RFcbvkpqRWkAbFwRy', '2026-10-12 08:00:00', 'superadmin', '2026-10-19 11:59:06', 'superadmin', 1),
+	(5, 3, 'Staf Keuangan', 'keuangan@example.com', '$2b$10$hkdBpIBGNBLHYhCbF9ffm.JXWQBJ5maOCSg/RFcbvkpqRWkAbFwRy', '2026-10-13 08:00:00', 'superadmin', '2026-10-19 06:20:41', 'Super Admin', 1),
+	(6, 3, 'Supervisor Operasional', 'supervisor@example.com', '$2b$10$hkdBpIBGNBLHYhCbF9ffm.JXWQBJ5maOCSg/RFcbvkpqRWkAbFwRy', '2026-10-14 08:00:00', 'superadmin', '2026-10-19 11:59:07', 'superadmin', 1),
+	(10, 4, 'admin', 'admin@gmail.com', '$2y$10$Pl.mtSw34TvthjT8MdVVNuUYqUVlzYUCWSfj.13FWH7WdZxeWppf2', '2026-10-19 05:10:39', 'Administrator', '2026-10-19 05:13:08', 'Administrator', 0);
+
+-- Dumping structure for table master_tailadmin.user_access
+CREATE TABLE IF NOT EXISTS `user_access` (
+  `iduser_access` int NOT NULL AUTO_INCREMENT,
+  `user_id` int unsigned NOT NULL,
+  `menu_name` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `access` tinyint(1) NOT NULL DEFAULT '0',
+  `created` datetime DEFAULT NULL,
+  `updated` datetime DEFAULT NULL,
+  `status` int NOT NULL DEFAULT '1',
+  PRIMARY KEY (`iduser_access`),
+  UNIQUE KEY `uk_user_access_menu` (`user_id`,`menu_name`),
+  CONSTRAINT `fk_user_access_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=77 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Dumping data for table master_tailadmin.user_access: ~25 rows (approximately)
+INSERT INTO `user_access` (`iduser_access`, `user_id`, `menu_name`, `access`, `created`, `updated`, `status`) VALUES
+	(52, 4, 'dashboard', 1, '2026-10-19 03:57:41', '2026-10-19 03:57:41', 1),
+	(53, 4, 'karyawan', 1, '2026-10-19 03:57:41', '2026-10-19 03:57:41', 1),
+	(54, 4, 'supplier', 1, '2026-10-19 03:57:41', '2026-10-19 03:57:41', 1),
+	(55, 4, 'user', 0, '2026-10-19 03:57:41', '2026-10-19 03:57:41', 1),
+	(56, 4, 'user_role', 0, '2026-10-19 03:57:41', '2026-10-19 03:57:41', 1),
+	(57, 3, 'dashboard', 1, '2026-10-19 03:57:46', '2026-10-19 03:57:46', 1),
+	(58, 3, 'karyawan', 1, '2026-10-19 03:57:46', '2026-10-19 03:57:46', 1),
+	(59, 3, 'supplier', 1, '2026-10-19 03:57:46', '2026-10-19 03:57:46', 1),
+	(60, 3, 'user', 0, '2026-10-19 03:57:46', '2026-10-19 03:57:46', 1),
+	(61, 3, 'user_role', 0, '2026-10-19 03:57:46', '2026-10-19 03:57:46', 1),
+	(62, 5, 'dashboard', 1, '2026-10-19 03:57:52', '2026-10-19 03:57:52', 1),
+	(63, 5, 'karyawan', 1, '2026-10-19 03:57:52', '2026-10-19 03:57:52', 1),
+	(64, 5, 'supplier', 1, '2026-10-19 03:57:52', '2026-10-19 03:57:52', 1),
+	(65, 5, 'user', 0, '2026-10-19 03:57:52', '2026-10-19 03:57:52', 1),
+	(66, 5, 'user_role', 0, '2026-10-19 03:57:52', '2026-10-19 03:57:52', 1),
+	(67, 6, 'dashboard', 1, '2026-10-19 03:58:03', '2026-10-19 03:58:03', 1),
+	(68, 6, 'karyawan', 1, '2026-10-19 03:58:03', '2026-10-19 03:58:03', 1),
+	(69, 6, 'supplier', 1, '2026-10-19 03:58:03', '2026-10-19 03:58:03', 1),
+	(70, 6, 'user', 0, '2026-10-19 03:58:03', '2026-10-19 03:58:03', 1),
+	(71, 6, 'user_role', 0, '2026-10-19 03:58:03', '2026-10-19 03:58:03', 1),
+	(72, 10, 'dashboard', 1, '2026-10-19 05:10:39', '2026-10-19 05:11:51', 1),
+	(73, 10, 'karyawan', 1, '2026-10-19 05:10:39', '2026-10-19 05:11:51', 1),
+	(74, 10, 'supplier', 1, '2026-10-19 05:10:39', '2026-10-19 05:11:51', 1),
+	(75, 10, 'user', 0, '2026-10-19 05:10:39', '2026-10-19 05:11:51', 1),
+	(76, 10, 'user_role', 0, '2026-10-19 05:10:39', '2026-10-19 05:11:51', 1);
+
+-- Dumping structure for table master_tailadmin.user_role
+CREATE TABLE IF NOT EXISTS `user_role` (
+  `iduser_role` int NOT NULL AUTO_INCREMENT,
+  `idrole` int NOT NULL,
+  `menu_name` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `access` tinyint(1) NOT NULL DEFAULT '0',
+  `created` datetime DEFAULT NULL,
+  `createdby` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `updated` datetime DEFAULT NULL,
+  `updatedby` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `status` int NOT NULL DEFAULT '1',
+  PRIMARY KEY (`iduser_role`),
+  UNIQUE KEY `uk_user_role_menu` (`idrole`,`menu_name`),
+  CONSTRAINT `fk_user_role_role` FOREIGN KEY (`idrole`) REFERENCES `role` (`idrole`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=20 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Dumping data for table master_tailadmin.user_role: ~11 rows (approximately)
 
 /*!40103 SET TIME_ZONE=IFNULL(@OLD_TIME_ZONE, 'system') */;
 /*!40101 SET SQL_MODE=IFNULL(@OLD_SQL_MODE, '') */;
