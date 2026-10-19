@@ -6,6 +6,7 @@ class Dashboard extends Admin_Controller
     public function __construct()
     {
         parent::__construct();
+        $this->require_access('dashboard');
         $this->load->model(array('Karyawan_model', 'Supplier_model'));
     }
 
@@ -23,10 +24,12 @@ class Dashboard extends Admin_Controller
 
         $year = (int) date('Y');
 
-        $this->render('dashboard/index', array(
+        $data = array(
             'stat'   => $stat,
             'recent' => $this->Karyawan_model->recent(5),
-        ), array(
+        );
+
+        $page_config = array(
             'title'      => 'Dashboard',
             'page'       => 'dashboard',
             'main_class' => 'mx-auto max-w-(--breakpoint-2xl) p-4 pb-20 md:p-6 md:pb-6',
@@ -39,6 +42,8 @@ class Dashboard extends Admin_Controller
                         : 0,
                 ),
             ),
-        ));
+        );
+
+        $this->render('dashboard/index', $data, $page_config);
     }
 }

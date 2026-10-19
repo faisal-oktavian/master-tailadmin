@@ -158,8 +158,9 @@
       body: new FormData(form),
     });
   };
-  window.__navigateMenu = function (url, push) {
-    return navigate(url, !!push);
+  // opsi kedua (opsional): { minimumLoadingMs: 1000 } supaya loading konten terlihat jelas
+  window.__navigateMenu = function (url, push, options) {
+    return navigate(url, !!push, options);
   };
 
   document.addEventListener("click", function (e) {

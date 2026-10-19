@@ -9,14 +9,17 @@ class Supplier extends Admin_Controller
     public function __construct()
     {
         parent::__construct();
+        $this->require_access('supplier');
         $this->load->model('Supplier_model');
     }
 
     public function index()
     {
-        $this->render('supplier/index', array(
-            'rows' => $this->Supplier_model->all(),
-        ), array(
+        $data = array(
+            'rows' => $this->Supplier_model->all()
+        );
+
+        $page_config = array(
             'title'      => 'Master Supplier',
             'page'       => 'supplier',
             'breadcrumb' => array('Master Data', 'Master Supplier'),
@@ -25,7 +28,9 @@ class Supplier extends Admin_Controller
                 'success' => $this->session->flashdata('success'),
                 'error'   => $this->session->flashdata('error'),
             ),
-        ));
+        );
+
+        $this->render('supplier/index', $data, $page_config);
     }
 
     public function create()
@@ -100,11 +105,14 @@ class Supplier extends Admin_Controller
     private function form_page($row, $has_error = FALSE)
     {
         $is_edit = $row !== null;
-        $this->render('supplier/form', array(
+
+        $data = array(
             'row'     => $row,
             'is_edit' => $is_edit,
             'action'  => $is_edit ? site_url('supplier/update/' . $row['id']) : site_url('supplier/store'),
-        ), array(
+        );
+
+        $page_config = array(
             'title'      => $is_edit ? 'Edit Supplier' : 'Tambah Supplier',
             'page'       => 'supplier',
             'breadcrumb' => array('Master Data', 'Master Supplier', $is_edit ? 'Edit' : 'Tambah'),
@@ -113,21 +121,22 @@ class Supplier extends Admin_Controller
                 'swalError'      => 'Periksa kembali isian Anda.',
                 'supplierErrors' => $this->form_validation->error_array(),
             ) : array(),
-        ));
+        );
+
+        $this->render('supplier/form', $data, $page_config);
     }
 
     private function apply_rules($id)
     {
         $unique_kode = $id ? 'edit_unique[supplier.kode.' . $id . ']' : 'is_unique[supplier.kode]';
 
-        $v = $this->form_validation;
-        $v->set_rules('kode', 'Kode', 'trim|required|max_length[20]|' . $unique_kode);
-        $v->set_rules('nama', 'Nama supplier', 'trim|required|max_length[100]');
-        $v->set_rules('email', 'Email', 'trim|required|valid_email|max_length[100]');
-        $v->set_rules('telepon', 'Telepon', 'trim|required|regex_match[/^[0-9+\-\s()]{6,20}$/]');
-        $v->set_rules('kota', 'Kota', 'trim|required|max_length[60]');
-        $v->set_rules('alamat', 'Alamat', 'trim|required|max_length[500]');
-        $v->set_rules('aktif', 'Status', 'trim|required|in_list[0,1]');
+        $this->form_validation->set_rules('kode', 'Kode', 'trim|required|max_length[20]|' . $unique_kode);
+        $this->form_validation->set_rules('nama', 'Nama supplier', 'trim|required|max_length[100]');
+        $this->form_validation->set_rules('email', 'Email', 'trim|required|valid_email|max_length[100]');
+        $this->form_validation->set_rules('telepon', 'Telepon', 'trim|required|regex_match[/^[0-9+\-\s()]{6,20}$/]');
+        $this->form_validation->set_rules('kota', 'Kota', 'trim|required|max_length[60]');
+        $this->form_validation->set_rules('alamat', 'Alamat', 'trim|required|max_length[500]');
+        $this->form_validation->set_rules('aktif', 'Status', 'trim|required|in_list[0,1]');
     }
 
     private function collect()

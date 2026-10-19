@@ -11,6 +11,8 @@ Layout (sidebar, header, breadcrumb, kartu, tabel, form, modal, dark mode) memak
 | Dashboard | `/dashboard` | Kartu statistik, grafik karyawan bergabung per bulan, % karyawan aktif, karyawan terbaru |
 | **Master Karyawan** | `/karyawan` | CRUD memakai **popup modal** (AJAX). Semua tipe input ada di modal |
 | **Master Supplier** | `/supplier` | CRUD memakai **halaman baru** (`/supplier/create`, `/supplier/edit/ID`) |
+| **User** | `/user` | CRUD dengan DataTables dan modal (AJAX) pada tabel `users` |
+| **Hak Akses** | `/user_role` | Atur izin menu secara langsung untuk setiap user |
 
 SweetAlert2 dipakai untuk: notifikasi sukses/gagal (toast dari flashdata), konfirmasi hapus,
 konfirmasi simpan (Master Supplier), konfirmasi logout, dan peringatan validasi.
@@ -36,9 +38,17 @@ select multiple, radio, checkbox (grup + tunggal), switch, textarea, file (uploa
 
 2. **Database**
    ```bash
-   mysql -u root -p < database.sql
+   mysql -u root -p < master_tailadmin.sql
    ```
    Lalu sesuaikan `application/config/database.php` (hostname, username, password, database).
+   Jalankan kedua migrasi berikut setelah import dump:
+   ```bash
+   mysql -u root -p master_tailadmin < database_role_access.sql
+   mysql -u root -p master_tailadmin < database_user_access.sql
+   ```
+   Migrasi pertama membuat role Administrator dan Operator serta menghubungkan pengguna pertama sebagai Administrator.
+   Migrasi kedua menyalin izin role awal menjadi izin per user. Untuk database yang sudah berjalan, jangan impor ulang dump contoh;
+   jalankan hanya migrasi yang belum diterapkan.
 
 3. **Build aset TailAdmin**
    ```bash
@@ -66,20 +76,23 @@ select multiple, radio, checkbox (grup + tunggal), switch, textarea, file (uploa
 ## Struktur penting
 ```
 application/
-  controllers/  Auth, Dashboard, Karyawan (modal/AJAX), Supplier (halaman)
+   controllers/  Auth, Dashboard, Karyawan (modal/AJAX), Supplier, User, User_role
   core/         MY_Controller.php (MY_Controller + Admin_Controller)
   libraries/    MY_Form_validation.php (edit_unique, url_opsional)
-  models/       User_model, Karyawan_model, Supplier_model
+   models/       User_model, Role_model, Karyawan_model, Supplier_model
   views/
     layouts/    main, header, sidebar, overlay, preloader  (dari partial TailAdmin)
     auth/       login
     dashboard/  index
     karyawan/   index (tabel + modal)
-    supplier/   index, form
+   supplier/   index, form
+   user/       index, form
+   user_role/  index (izin per-user)
 src/            sumber CSS/JS/gambar TailAdmin (dibuild webpack ke assets/)
 assets/         hasil build (dibuat oleh npm run build)
 uploads/        foto karyawan (eksekusi script dimatikan lewat .htaccess)
-database.sql    skema + data contoh
+master_tailadmin.sql data contoh
+database_role_access.sql, database_user_access.sql migrasi role dan izin
 ```
 
 ## Endpoint Master Karyawan (modal, JSON)
@@ -89,6 +102,15 @@ database.sql    skema + data contoh
 | POST | `/karyawan/store` | tambah |
 | POST | `/karyawan/update/{id}` | ubah (password/foto kosong = tidak diubah) |
 | POST | `/karyawan/delete/{id}` | hapus |
+
+## Endpoint User (DataTables, modal, JSON)
+| Method | URL | Fungsi |
+|---|---|---|
+| GET | `/user/table` | data user untuk DataTables |
+| GET | `/user/get/{id}` | data user untuk modal edit |
+| POST | `/user/store` | tambah user |
+| POST | `/user/update/{id}` | ubah user (password kosong = tidak diubah) |
+| POST | `/user/delete/{id}` | hapus user |
 
 ## Catatan
 - CI 3.1.13 memakai dynamic property, sehingga PHP 8.2 mengeluarkan `E_DEPRECATED`.

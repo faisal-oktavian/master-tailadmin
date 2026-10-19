@@ -14,7 +14,12 @@ class Auth extends MY_Controller
         if ($this->session->userdata('user_id')) {
             redirect('dashboard');
         }
-        $this->load->view('auth/login', array('old_email' => $this->session->flashdata('old_email')));
+
+        $data = array(
+            'old_email' => $this->session->flashdata('old_email')
+        );
+
+        $this->load->view('auth/login', $data);
     }
 
     public function process()

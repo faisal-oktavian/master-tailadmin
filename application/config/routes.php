@@ -12,3 +12,7 @@ $route['logout']        = 'auth/logout';
 
 // Dashboard
 $route['dashboard'] = 'dashboard/index';
+
+// Role and menu access
+$route['user_role'] = 'user_role/index';
+$route['user_role/save_permissions'] = 'user_role/save_permissions';

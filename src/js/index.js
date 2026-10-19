@@ -29,7 +29,7 @@ window.Alpine = Alpine;
 // i18next + $t() magic dari TailAdmin
 setupI18n(Alpine);
 
-// Komponen CRUD (Master Karyawan & Master Supplier)
+// Komponen CRUD (Master Karyawan, Supplier, dan User)
 registerApp(Alpine);
 
 Alpine.start();

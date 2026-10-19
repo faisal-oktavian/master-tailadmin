@@ -7,29 +7,54 @@ class Karyawan_model extends CI_Model
 
     public function all()
     {
-        return $this->db->order_by('id', 'DESC')->get($this->table)->result_array();
+        $this->db->order_by('id', 'DESC');
+        $karyawan = $this->db->get($this->table);
+        // echo "<pre>"; print_r($this->db->last_query());die;
+
+        $data_kary = $karyawan->result_array();
+
+        return $data_kary;
     }
 
     public function find($id)
     {
-        return $this->db->get_where($this->table, array('id' => (int) $id), 1)->row_array();
+        $this->db->where('id', (int) $id);
+        $this->db->limit(1);
+        $karyawan = $this->db->get($this->table);
+        // echo "<pre>"; print_r($this->db->last_query());die;
+
+        $data_kary = $karyawan->row_array();
+
+        return $data_kary;
     }
 
     public function insert($data)
     {
         $data['created_at'] = date('Y-m-d H:i:s');
-        $this->db->insert($this->table, $data);
-        return $this->db->insert_id();
+        $kary = $this->db->insert($this->table, $data);
+        $idkaryawan = $this->db->insert_id();
+
+        return $idkaryawan;
     }
 
     public function update($id, $data)
     {
         $data['updated_at'] = date('Y-m-d H:i:s');
-        return $this->db->where('id', (int) $id)->update($this->table, $data);
+
+        $this->db->where('id', (int) $id);
+        $update_kary = $this->db->update($this->table, $data);
+        
+        return $update_kary;
     }
 
     public function delete($id)
     {
+        
+        $this->db->where('id', (int) $id);
+        $update_kary = $this->db->delete($this->table);
+        
+        return $update_kary;
+
         return $this->db->where('id', (int) $id)->delete($this->table);
     }
 

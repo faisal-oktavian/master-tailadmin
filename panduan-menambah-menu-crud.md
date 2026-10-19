@@ -18,6 +18,7 @@ Contoh utama di bawah adalah membuat **Master User dengan pola modal Karyawan**.
 | Alpine component  | `karyawanCrud` di `src/js/app.js`                 | `supplierList` dan handler                | Interaksi browser dan request AJAX                |
                                                                             form di `src/js/app.js`
 | Menu/sidebar      | `application/views/layouts/sidebar.php`           | Sama                                      | Link menu dan status menu aktif                   |
+| Hak akses menu    | `User_role::$modules`, `User::MENUS`, `Role_model` | Sama                                      | Daftar menu dan izin role/user                    |
 | Route             | `application/config/routes.php`                   | Sama                                      | URL; controller CI3 juga mendukung auto-routing   |
 | Database          | `master_tailadmin.sql`                            | Sama                                      | Skema awal dan data contoh                        |
 | Hasil build       | `assets/js/bundle.js`, `assets/css/style.css`     | Sama                                      | Dibuat dari `src/`; jangan edit manual            |
@@ -54,7 +55,7 @@ Link yang harus memakai navigasi konten diberi `data-menu-nav`. Link form dapat 
 
 ### 1. Pastikan Tabel yang Akan Dikelola
 
-Project sudah mempunyai tabel `users` di `master_tailadmin.sql` dengan kolom `id`, `nama`, `email`, `password`, dan `created_at`. Tabel itu juga dipakai proses login.
+Project sudah mempunyai tabel `users` di `master_tailadmin.sql` dengan kolom dasar `id`, `nama`, `email`, `password`, dan `created_at`. Tabel itu juga dipakai proses login. Migrasi role menambahkan `idrole`; lihat bagian [Daftarkan Menu dan Hak Akses](#9-daftarkan-menu-dan-hak-akses) sebelum mengubah CRUD User.
 
 Penting:
 
@@ -81,9 +82,9 @@ Jangan menyalin isi Karyawan mentah tanpa mengubah nama class, tabel, endpoint, 
 
 ### 3. Sesuaikan Model
 
-Di `Master_user_model.php`:
+Di `User_model.php`:
 
-- Ubah nama class menjadi `Master_user_model`.
+- Ubah nama class menjadi `User_model`.
 - Gunakan `$table = 'users'`.
 - Tambahkan method `all()`, `find($id)`, `insert($data)`, `update($id, $data)`, dan `delete($id)` mengikuti bentuk `Karyawan_model`.
 - Gunakan daftar kolom eksplisit tanpa `password` untuk `all()` dan data yang dipakai tabel.
@@ -95,7 +96,7 @@ Di `Master_user_model.php`:
 Di `Master_user.php`:
 
 - Ubah class menjadi `Master_user extends Admin_Controller`.
-- Load `Master_user_model`.
+- Load `User_model`.
 - Pada `index()`, ambil data aman dari model dan render `master_user/index` dengan opsi konsisten:
   - `title`: `Master User`
   - `page`: `master_user`
@@ -184,10 +185,27 @@ Edit `application/views/layouts/sidebar.php` dengan menyalin satu item menu Mast
 - `href`: `site_url('master_user')`.
 - Teks: `Master User`.
 - Ubah kondisi menu dan ikon menjadi `page === 'master_user'`.
+- Untuk menu yang dibatasi hak akses, tampilkan item hanya jika `!empty($menu_access['master_user'])`.
 
 Nilai `page` pada controller harus sama persis dengan nilai di sidebar. Link sidebar sudah ditangani oleh `static/js/menu-nav.js`; tidak perlu menggandakan handler navigasi.
 
-### 9. Opsi URL Eksplisit
+### 9. Daftarkan Menu dan Hak Akses
+
+Menu yang dilindungi harus memakai satu kunci konsisten (contoh: `master_user`) di controller, sidebar, dan data izin. Sidebar hanya menyembunyikan link; akses URL tetap harus diperiksa di server. Pola proyek saat ini:
+
+Menu administrasi yang sudah ada memakai kunci `user` untuk controller `User` dan `user_role` untuk controller `User_role`. Contoh `master_user` pada panduan ini hanya berlaku bila membuat menu baru dengan nama tersebut; jangan mengganti kunci fitur yang sudah ada secara sebagian.
+
+- Di controller, panggil `$this->require_access('master_user')` pada constructor agar seluruh endpoint controller terlindungi, atau panggil pada setiap endpoint yang perlu dibatasi.
+- Di `application/views/layouts/sidebar.php`, gunakan `!empty($menu_access['master_user'])` untuk menampilkan link dan `page === 'master_user'` untuk status aktif.
+- Tambahkan pasangan kunci dan label ke `User_role::$modules` pada `application/controllers/User_role.php`, agar menu muncul di halaman Hak Akses.
+- Tambahkan kunci ke `User::MENUS` pada `application/controllers/User.php`. Daftar ini dipakai untuk membuat izin awal user baru dari izin role.
+- Saat menambah menu pada instalasi baru, tambahkan kuncinya ke daftar menu pada `database_role_access.sql` dan `database_user_access.sql`, serta tentukan izin default role yang sesuai.
+
+Izin role disimpan di `user_role` dan menjadi template/default saat user dibuat. Izin yang benar-benar diperiksa untuk user non-administrator disimpan terpisah di `user_access`; halaman Hak Akses mengubah izin individual tersebut. Perubahan izin role tidak otomatis mengubah izin user yang sudah ada. Role bernama `administrator` selalu lolos pemeriksaan akses, sementara kunci izin yang belum tersedia akan dianggap tidak diizinkan untuk user lain.
+
+Untuk database yang sudah terpasang, buat migrasi SQL baru untuk menambahkan kunci menu ke `user_role` dan `user_access` bagi data yang sudah ada, dengan nilai default yang disengaja. Jangan hanya mengubah file SQL instalasi awal atau menjalankan ulang migrasi skema. Setelah perubahan, uji sebagai administrator dan user non-administrator: link harus sesuai izinnya dan URL langsung yang tidak diizinkan harus menghasilkan HTTP 403.
+
+### 10. Opsi URL Eksplisit
 
 Rute sederhana mengikuti konvensi controller/method CI3. Jika ingin nama URL lain, daftarkan di `application/config/routes.php`, misalnya:
 
@@ -202,7 +220,7 @@ $route['master-user/delete/(:num)'] = 'master_user/delete/$1';
 
 Jika memakai alias ini, semua URL di view dan `src/js/app.js` harus memakai alias yang sama. Tanpa alias, gunakan `/master_user/...` secara konsisten.
 
-### 10. Bangun dan Uji
+### 11. Bangun dan Uji
 
 Setelah perubahan:
 
@@ -211,7 +229,8 @@ Setelah perubahan:
 3. Uji daftar, pencarian, paginasi, Tambah, validasi kosong, email duplikat, Edit, password kosong saat Edit, password baru, Hapus, serta refresh setelah perubahan.
 4. Pastikan JSON detail tidak berisi password/hash.
 5. Pastikan klik link sidebar tetap hanya mengganti konten dan menu aktif memakai `page` yang benar.
-6. Uji akun login yang ada setelah perubahan. Jangan sampai CRUD menghapus akun admin atau merusak `password_hash`.
+6. Untuk menu yang dilindungi, uji visibilitas sidebar dan akses langsung URL untuk user dengan izin dan tanpa izin.
+7. Uji akun login yang ada setelah perubahan. Jangan sampai CRUD menghapus akun admin atau merusak `password_hash`.
 
 ## Daftar Ringkas File
 
